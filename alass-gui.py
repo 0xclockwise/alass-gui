@@ -4,7 +4,6 @@ from tkinter import messagebox
 from tkinter import filedialog
 from tkinter import Menu
 import subprocess
-from threading import Thread
 from encoding_list import enc_list # TODO: tidy up that list
 from terminals import term_list
 import shutil
