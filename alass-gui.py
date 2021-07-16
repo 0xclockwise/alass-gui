@@ -72,7 +72,9 @@ def _quit():
 
 def _about():
     abt = Toplevel(win)
-    abt.wm_attributes('-topmost', 1)
+    # abt.wm_attributes('-topmost', 1)
+    # abt.grab_set()
+    abt.transient(win)
     abt.resizable(False, False)
     abt.title('About')
     lb = Label(abt, text='Automatic Language-Agnostic Subtitle Synchronization', padding=20)
