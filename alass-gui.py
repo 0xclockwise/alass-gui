@@ -5,8 +5,10 @@ from tkinter import filedialog
 from tkinter import Menu
 import subprocess
 from encoding_list import enc_list # TODO: tidy up that list
-from terminals import term_list
+import terminals
 import shutil
+import sys
+import webbrowser
 
 filetypes = [('Subtitle file', '*.srt *.ass *.ssa *.idx *.sub')]
 
@@ -26,13 +28,22 @@ def set_out_file():
         out_file.set(path)
 
 def choose_terminal():
-    for t in term_list:
+    if sys.platform == 'win32':
+        term_cb.config(state='disabled', values=terminals.term_win)
+        return
+    term_cb.config(values=terminals.term_linux)
+    for t in terminals.term_linux:
         if shutil.which(t):
             term.set(t)
-            return
+            break
+    
 
 
 def run():
+    # cmd.exe
+    if term.get() == 'cmd.exe':
+        p = subprocess.Popen([term.get(), '/K', f'.\\alass-windows64\\bin\\alass-cli {ref_file.get()} {inc_file.get()} {out_file.get()}'])
+        return
     # gnome-terminal
     if term.get() == 'gnome-terminal':
         p = subprocess.Popen([term.get(), '--', 'sh', '-c', f'alass {ref_file.get()} {inc_file.get()} {out_file.get()} ; echo Press \<Enter\> to close ; read'])
@@ -57,10 +68,22 @@ def run():
 def _quit():
     win.quit()
     win.destroy()
-    exit()
+    exit()  
 
 def _about():
-    messagebox.showinfo('About', 'Original program by kaegi')
+    abt = Toplevel(win)
+    abt.wm_attributes('-topmost', 1)
+    abt.resizable(False, False)
+    abt.title('About')
+    lb = Label(abt, text='Automatic Language-Agnostic Subtitle Synchronization', padding=20)
+    thes = Button(abt, text='How it works', command=lambda: webbrowser.open('https://github.com/kaegi/alass/raw/master/documentation/thesis.pdf'))
+    alass = Button(abt, text='ALASS - Github page', command=lambda: webbrowser.open('https://github.com/kaegi/alass'))
+    gui = Button(abt, text='ALASS GUI - Github page', command=lambda: webbrowser.open('https://github.com/0xclockwise/alass-gui/'))
+    lb.grid(column=0, row=0, columnspan=3)
+    thes.grid(column=0, row=1)
+    alass.grid(column=1, row=1)
+    gui.grid(column=2, row=1)
+
 
 win = Tk()
 win.title('ALASS - GUI')
@@ -86,7 +109,6 @@ audio_index = IntVar(value=0)
 ref_enc = StringVar(value='auto')
 inc_enc = StringVar(value='auto')
 term = StringVar()
-choose_terminal()
 
 
 ref_lab = Label(win, text='Reference file: ')
@@ -112,7 +134,8 @@ ref_enc_cb = Combobox(adv, values=enc_list, state='readonly', textvariable=ref_e
 inc_enc_lb = Label(adv, text='Incorrect encoding:')
 inc_enc_cb = Combobox(adv, values=enc_list, state='readonly', textvariable=inc_enc)
 term_lb = Label(adv, text='Terminal emulator:')
-term_cb = Combobox(adv, values=term_list, state='readonly', textvariable=term)
+term_cb = Combobox(adv, state='readonly', textvariable=term)
+choose_terminal()
 
 ref_lab.grid(column=0, row=0, sticky='w')
 ref_ent.grid(column=1, row=0)

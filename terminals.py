@@ -1,4 +1,4 @@
-term_list = [
+term_linux = [
 'st',
 'terminator',
 'kitty',
@@ -13,3 +13,5 @@ term_list = [
 'lxterminal',
 'xterm'
 ]
+
+term_win = ['cmd.exe']

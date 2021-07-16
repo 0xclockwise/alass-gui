@@ -1,0 +1,6 @@
+*.srt
+test.py
+__pycache__
+.vscode
+alass-windows64
+env
