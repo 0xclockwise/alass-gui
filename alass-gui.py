@@ -40,29 +40,41 @@ def choose_terminal():
 
 
 def run():
+    alasscmd = f'alass {ref_file.get()} {inc_file.get()} {out_file.get()} ' +\
+    f'{"--disable-fps-guessing " if dfg.get() else ""}' +\
+    f'{"--no-split " if no_split.get() else ""}' +\
+    f'--encoding-inc {inc_enc.get()} ' +\
+    f'--interval {interval.get()} ' +\
+    f'--speed-optimization {optimize.get() } ' +\
+    f'--split-penalty {split_penalty.get()} '
+
+    if ref_file.get()[-4:] not in ('.srt', '.sub', '.ass', '.ssa', '.idx'):
+        alasscmd += f'--audio-index {audio_index.get()} ' # we are using a video file as the reference
+    else:
+        alasscmd += f'--encoding-ref {ref_enc.get()} '
+    
+    print(alasscmd)
+
+
     # cmd.exe
     if term.get() == 'cmd.exe':
         p = subprocess.Popen([term.get(), '/K', f'.\\alass-windows64\\bin\\alass-cli {ref_file.get()} {inc_file.get()} {out_file.get()}'])
         return
     # gnome-terminal
     if term.get() == 'gnome-terminal':
-        p = subprocess.Popen([term.get(), '--', 'sh', '-c', f'alass {ref_file.get()} {inc_file.get()} {out_file.get()} ; echo Press \<Enter\> to close ; read'])
+        p = subprocess.Popen([term.get(), '--', 'sh', '-c', f'{alasscmd} ; echo Press \<Enter\> to close ; read'])
         return
     # urxvt, st, deepin-terminal, kitty, konsole, alacritty and xterm
     if term.get() in ('urxvt', 'st', 'xterm', 'io.elementary.terminal', 'deepin-terminal', 'kitty', 'konsole', 'alacritty'):
-        p = subprocess.Popen([term.get(), '-e', 'sh', '-c', f'alass {ref_file.get()} {inc_file.get()} {out_file.get()} ; echo Press \<Enter\> to close ; read'])
+        p = subprocess.Popen([term.get(), '-e', 'sh', '-c', f'{alasscmd} ; echo Press \<Enter\> to close ; read'])
         return
-    # io.elementary.terminal
-    # this terminal emulator does not close after the program in it finishes, so there is no need to call the read command
-    if term.get() == 'io.elementary.terminal':
-        p = subprocess.Popen([term.get(), '-e', f'sh -c alass {ref_file.get()} {inc_file.get()} {out_file.get()}'])
     # terminator and terminolofy
     if term.get() in ('terminator', 'terminology'):
-        p = subprocess.Popen([term.get(), '-e', f'sh -c alass {ref_file.get()} {inc_file.get()} {out_file.get()} ; echo Press \<Enter\> to close ; read'])
+        p = subprocess.Popen([term.get(), '-e', f'sh -c {alasscmd} ; echo Press \<Enter\> to close ; read'])
         return
     # xfce4-terminal and lxterminal
     if term.get() in ('xfce4-terminal', 'lxterminal'):
-        p = subprocess.Popen([term.get(), '-e', f'sh -c "alass {ref_file.get()} {inc_file.get()} {out_file.get()} ; echo Press \<Enter\> to close ; read"'])
+        p = subprocess.Popen([term.get(), '-e', f'sh -c "{alasscmd} ; echo Press \<Enter\> to close ; read"'])
         return
 
 def _quit():
@@ -72,8 +84,6 @@ def _quit():
 
 def _about():
     abt = Toplevel(win)
-    # abt.wm_attributes('-topmost', 1)
-    # abt.grab_set()
     abt.transient(win)
     abt.resizable(False, False)
     abt.title('About')
@@ -111,6 +121,9 @@ audio_index = IntVar(value=0)
 ref_enc = StringVar(value='auto')
 inc_enc = StringVar(value='auto')
 term = StringVar()
+interval = StringVar(value='1')
+optimize = IntVar(value=1)
+split_penalty = IntVar(value=7)
 
 
 ref_lab = Label(win, text='Reference file: ')
@@ -138,6 +151,11 @@ inc_enc_cb = Combobox(adv, values=enc_list, state='readonly', textvariable=inc_e
 term_lb = Label(adv, text='Terminal emulator:')
 term_cb = Combobox(adv, state='readonly', textvariable=term)
 choose_terminal()
+interval_lb = Label(adv, text='Smallest recognized time interval (ms):')
+interval_sb = Spinbox(adv, from_=1, to=2**32, increment=1, textvariable=interval)
+optimize_cb = Checkbutton(adv, text='Speed optimization (less accurate)', variable=optimize)
+split_penalty_lb = Label(adv, text='Split penalty:')
+split_penalty_sb = Spinbox(adv, from_=0, to=1000, increment=1, textvariable=split_penalty)
 
 ref_lab.grid(column=0, row=0, sticky='w')
 ref_ent.grid(column=1, row=0)
@@ -163,6 +181,11 @@ inc_enc_lb.grid(column=0, row=7, sticky='w')
 inc_enc_cb.grid(column=0, row=8, sticky='w')
 term_lb.grid(column=0, row=9, sticky='w')
 term_cb.grid(column=0, row=10, sticky='w')
+interval_lb.grid(column=0, row=11, sticky='w')
+interval_sb.grid(column=0, row=12, sticky='w')
+optimize_cb.grid(column=0, row=14, sticky='w')
+split_penalty_lb.grid(column=0, row=15, sticky='w')
+split_penalty_sb.grid(column=0, row=16, sticky='w')
 
 run_btn.grid(column=0, row=4, columnspan=3, sticky='nesw')
 

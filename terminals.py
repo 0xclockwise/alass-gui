@@ -9,7 +9,6 @@ term_linux = [
 'deepin-terminal',
 'urxvt',
 'terminology',
-'io.elementary.terminal',
 'lxterminal',
 'xterm'
 ]
