@@ -30,6 +30,7 @@ def set_out_file():
 def choose_terminal():
     if sys.platform == 'win32':
         term_cb.config(state='disabled', values=terminals.term_win)
+        term.set(terminals.term_win[0])
         return
     term_cb.config(values=terminals.term_linux)
     for t in terminals.term_linux:
